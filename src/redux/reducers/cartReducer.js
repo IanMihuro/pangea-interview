@@ -109,6 +109,15 @@ export default function (state = initialState, action) {
         decrementState.totalQuantity - 1
       );
 
+      if (decrementState.cart[productIndexA].quantity === 0) {
+        decrementState.cart.splice(productIndexA, 1);
+        return {
+          ...decrementState,
+          totalAmount: newTotalAmountIncrementedA,
+          totalQuantity: newTotalQuantityIncrementedA,
+        };
+      }
+
       return {
         ...decrementState,
         totalAmount: newTotalAmountIncrementedA,
