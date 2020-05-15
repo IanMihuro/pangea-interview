@@ -1,5 +1,11 @@
 import React, { Component } from "react";
 import styled from "styled-components";
+import { connect } from "react-redux";
+import {
+  removeFromCart,
+  incrementQuantity,
+  decrementQuantity,
+} from "../../redux/actions/cartActions";
 
 const CartItemContainer = styled.div`
   display: flex;
@@ -88,26 +94,41 @@ const Price = styled.div`
 `;
 
 class CartItem extends Component {
+  removeItemFromCart = (id) => {
+    this.props.removeFromCart(id);
+  };
+
+  incrementQuantity = (id) => {
+    this.props.incrementQuantity(id);
+  };
+
+  decrementQuantity = (id) => {
+    this.props.decrementQuantity(id);
+  };
+
   render() {
-    // const { title, price, image_url } = this.props.product;
-    const title = "Test";
-    const image_url =
-      "https://d1b929y2mmls08.cloudfront.net/luminskin/img/new-landing-page/classic-maintenance.png";
-    const price = 20;
+    const { id, title, price, image_url } = this.props.product;
+
+    const item = this.props.cart.cart.find((product) => product.id === id);
+
     return (
       <CartItemContainer>
         <CartItemContainerTop>
           <ProductTitle>{title}</ProductTitle>
-          <RemoveBtn>x</RemoveBtn>
+          <RemoveBtn onClick={() => this.removeItemFromCart(id)}>x</RemoveBtn>
         </CartItemContainerTop>
         <ImageContainer>
           <ProductImg src={image_url} alt="product image" />
         </ImageContainer>
         <QuantityContainer>
           <QuantitySelector>
-            <DecresseBtn>-</DecresseBtn>
-            <Quantity> 1 </Quantity>
-            <IncreaseBtn>+</IncreaseBtn>
+            <DecresseBtn onClick={() => this.decrementQuantity(id)}>
+              -
+            </DecresseBtn>
+            <Quantity>{item.quantity}</Quantity>
+            <IncreaseBtn onClick={() => this.incrementQuantity(id)}>
+              +
+            </IncreaseBtn>
           </QuantitySelector>
           <Price>${price}</Price>
         </QuantityContainer>
@@ -116,4 +137,12 @@ class CartItem extends Component {
   }
 }
 
-export default CartItem;
+const mapStateToProps = (state) => ({
+  cart: state.cart,
+});
+
+export default connect(mapStateToProps, {
+  removeFromCart,
+  incrementQuantity,
+  decrementQuantity,
+})(CartItem);

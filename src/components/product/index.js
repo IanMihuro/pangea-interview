@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import styled from "styled-components";
+import { connect } from "react-redux";
+import { addToCart } from "../../redux/actions/cartActions";
 
 const Content = styled.div`
   text-align: center;
@@ -53,7 +55,8 @@ const A = styled.a`
 
 class Product extends Component {
   addToCart = (product) => {
-    console.log(`${product.title} has been added to the cart`);
+    console.log("add to cart");
+    this.props.addToCart(product);
   };
 
   render() {
@@ -79,4 +82,4 @@ class Product extends Component {
   }
 }
 
-export default Product;
+export default connect(null, { addToCart })(Product);

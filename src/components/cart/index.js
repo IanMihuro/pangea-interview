@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import styled from "styled-components";
 import { Col } from "react-flexbox-grid";
+import { connect } from "react-redux";
+import { hideCart } from "../../redux/actions/cartActions";
 
 import BackIcon from "../../assets/SVG/shogun.svg";
 import CartItem from "../cartItem";
@@ -28,7 +30,6 @@ const LeftOverlay = styled.div`
 `;
 
 const CartContainer = styled.div`
-  height: 100%;
   width: 100%;
   float: right;
   z-index: 1004;
@@ -184,7 +185,7 @@ const CheckoutBtn = styled.a`
 
 class Cart extends Component {
   CloseCart = () => {
-    console.log("cart closed");
+    this.props.hideCart();
   };
 
   ChangeCurrency = () => {
@@ -227,8 +228,13 @@ class Cart extends Component {
           </CartHeader>
           <CartBody>
             <CartItemList>
-              {/* <CartEmptyMsg>There are no items in your cart</CartEmptyMsg> */}
-              <CartItem></CartItem>
+              {this.props.cart.cart.length === 0 ? (
+                <CartEmptyMsg>There are no items in your cart</CartEmptyMsg>
+              ) : (
+                this.props.cart.cart.map((product) => (
+                  <CartItem key={product.id} product={product} />
+                ))
+              )}
             </CartItemList>
           </CartBody>
           <CartFooter>
@@ -236,7 +242,7 @@ class Cart extends Component {
               <CartSubTotal>
                 <SubTotalPrice>
                   <span>Subtotal</span>
-                  <span>$0</span>
+                  <span>${this.props.cart.totalAmount}</span>
                 </SubTotalPrice>
               </CartSubTotal>
               <CartCheckout>
@@ -253,4 +259,8 @@ class Cart extends Component {
   }
 }
 
-export default Cart;
+const mapStateToProps = (state) => ({
+  cart: state.cart,
+});
+
+export default connect(mapStateToProps, { hideCart })(Cart);

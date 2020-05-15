@@ -1,5 +1,7 @@
-import React from "react";
+import React, { Component } from "react";
 import styled from "styled-components";
+import { connect } from "react-redux";
+import { showCart } from "../../redux/actions/cartActions";
 
 import Logo from "../../assets/PNG/lumin_logo.png";
 import ShoppingCart from "../../assets/PNG/shopping_cart.png";
@@ -39,6 +41,7 @@ const A = styled.a`
 const Button = styled.button`
   background: none;
   border: none;
+  cursor: pointer;
 `;
 
 const ShoppingCartImg = styled.img`
@@ -46,27 +49,37 @@ const ShoppingCartImg = styled.img`
   width: 30px;
 `;
 //TODO convert to Use Hook
-const Heder = () => {
-  return (
-    <>
-      <Cart />
-      <Nav>
-        <InnerNav>
-          <LogoImg src={Logo} alt="logo" />
-          <A href="/">Shop</A>
-          <A href="/">Learn</A>
-        </InnerNav>
+class Heder extends Component {
+  showCart = () => {
+    this.props.showCart();
+  };
 
-        <InnerNav>
-          <A href="/">Account</A>
-          <Button>
-            <ShoppingCartImg src={ShoppingCart} alt="shopping cart" />
-          </Button>
-          <p>0</p>
-        </InnerNav>
-      </Nav>
-    </>
-  );
-};
+  render() {
+    return (
+      <>
+        {this.props.cart.showCart && <Cart />}
 
-export default Heder;
+        <Nav>
+          <InnerNav>
+            <LogoImg src={Logo} alt="logo" />
+            <A href="/">Shop</A>
+            <A href="/">Learn</A>
+          </InnerNav>
+
+          <InnerNav>
+            <A href="/">Account</A>
+            <Button onClick={this.showCart}>
+              <ShoppingCartImg src={ShoppingCart} alt="shopping cart" />
+            </Button>
+            <p>{this.props.cart.totalQuantity}</p>
+          </InnerNav>
+        </Nav>
+      </>
+    );
+  }
+}
+const mapStateToProps = (state) => ({
+  cart: state.cart,
+});
+
+export default connect(mapStateToProps, { showCart })(Heder);
