@@ -130,7 +130,11 @@ class CartItem extends Component {
               +
             </IncreaseBtn>
           </QuantitySelector>
-          <Price>${price}</Price>
+          {this.props.altPrice !== null ? (
+            <Price>{this.props.altPrice}</Price>
+          ) : (
+            <Price>${price}</Price>
+          )}
         </QuantityContainer>
       </CartItemContainer>
     );

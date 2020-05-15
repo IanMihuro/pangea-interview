@@ -3,9 +3,23 @@ import styled from "styled-components";
 import { Col } from "react-flexbox-grid";
 import { connect } from "react-redux";
 import { hideCart } from "../../redux/actions/cartActions";
+import { compose } from "redux";
 
 import BackIcon from "../../assets/SVG/shogun.svg";
 import CartItem from "../cartItem";
+import Loader from "../spinner";
+import Error from "../product";
+
+//Graph Query
+import gql from "graphql-tag";
+import { Query } from "react-apollo";
+import { withApollo } from "@apollo/react-hoc";
+
+const ALL_CURRENCY_QUERY = gql`
+  {
+    currency
+  }
+`;
 
 const Overlay = styled.div`
   height: 100%;
@@ -184,13 +198,38 @@ const CheckoutBtn = styled.a`
 `;
 
 class Cart extends Component {
+  state = {
+    currency: "",
+    alternativePricingData: [],
+  };
   CloseCart = () => {
     this.props.hideCart();
   };
 
-  ChangeCurrency = () => {
-    console.log("currency changed.");
+  ChangeCurrency = (event) => {
+    this.setState({ currency: event.target.value }, async () => {
+      console.log("state: ", this.state.currency);
+      const CHANGE_CURRENCY_QUERY = gql`
+      {
+        products {
+          price(currency: ${this.state.currency})
+          id
+          title
+          image_url
+        }
+      }
+    `;
+      const { data } = await this.props.client.query({
+        query: CHANGE_CURRENCY_QUERY,
+      });
+
+      this.setState({
+        alternativePricingData: data.products,
+      });
+      console.log("data: ", data);
+    });
   };
+
   render() {
     return (
       <Overlay>
@@ -214,15 +253,39 @@ class Cart extends Component {
             <Col xs={4} sm={4} md={4} lg={4}></Col>
             <Col xs={12} sm={12} md={12} lg={12}>
               <CurrencyDiv>
-                <CurrencySelect
-                  style={{
-                    padding: "8px 15px 6px 10px",
-                    backgroundPosition: "47px center",
+                <Query query={ALL_CURRENCY_QUERY}>
+                  {({ loading, error, data }) => {
+                    if (loading)
+                      return (
+                        <h4>
+                          <Loader />
+                        </h4>
+                      );
+                    if (error)
+                      return (
+                        <h4>
+                          {" "}
+                          <Error error={error} />
+                        </h4>
+                      );
+                    return (
+                      <CurrencySelect
+                        style={{
+                          padding: "8px 15px 6px 10px",
+                          backgroundPosition: "47px center",
+                        }}
+                        onChange={this.ChangeCurrency}
+                        value={this.state.currency}
+                      >
+                        {data.currency.map((currency, index) => (
+                          <option key={index} value={currency}>
+                            {currency}
+                          </option>
+                        ))}
+                      </CurrencySelect>
+                    );
                   }}
-                  onChange={this.ChangeCurrency}
-                >
-                  <option>USD</option>
-                </CurrencySelect>
+                </Query>
               </CurrencyDiv>
             </Col>
           </CartHeader>
@@ -231,9 +294,28 @@ class Cart extends Component {
               {this.props.cart.cart.length === 0 ? (
                 <CartEmptyMsg>There are no items in your cart</CartEmptyMsg>
               ) : (
-                this.props.cart.cart.map((product) => (
-                  <CartItem key={product.id} product={product} />
-                ))
+                this.props.cart.cart.map((product) => {
+                  if (this.state.alternativePricingData.length > 0) {
+                    const item = this.state.alternativePricingData.find(
+                      (item) => item.id === product.id
+                    );
+                    return (
+                      <CartItem
+                        key={product.id}
+                        product={product}
+                        altPrice={item.price}
+                      />
+                    );
+                  }
+
+                  return (
+                    <CartItem
+                      key={product.id}
+                      product={product}
+                      altPrice={null}
+                    />
+                  );
+                })
               )}
             </CartItemList>
           </CartBody>
@@ -263,4 +345,7 @@ const mapStateToProps = (state) => ({
   cart: state.cart,
 });
 
-export default connect(mapStateToProps, { hideCart })(Cart);
+export default compose(
+  withApollo,
+  connect(mapStateToProps, { hideCart })
+)(Cart);
