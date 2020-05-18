@@ -5,6 +5,7 @@ import {
   REMOVE_FROM_CART,
   SHOW_CART,
   HIDE_CART,
+  CURRENCY_CHANGE,
 } from "../actions/types";
 
 const initialState = {
@@ -120,6 +121,30 @@ export default function (state = initialState, action) {
         totalQuantity: newTotalQuantity,
       };
     }
+
+    case CURRENCY_CHANGE: {
+      let newState = { ...state };
+      const updatedPriceItems = action.payload.products;
+      console.log("updatedPricedItems", updatedPriceItems);
+      let totalCost = 0;
+      let index = 0;
+      for (let product of updatedPriceItems) {
+        for (let i = 0; i <= newState.cart.length - 1; i++) {
+          if (product.id === newState.cart[i].id) {
+            index = i;
+            newState.cart[index].price = product.price;
+            totalCost =
+              totalCost +
+              newState.cart[index].price * newState.cart[index].quantity;
+          }
+        }
+      }
+      return {
+        ...newState,
+        totalAmount: totalCost,
+      };
+    }
+
     default:
       return state;
   }

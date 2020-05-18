@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import styled from "styled-components";
 import { Col } from "react-flexbox-grid";
 import { connect } from "react-redux";
-import { hideCart } from "../../redux/actions/cartActions";
+import { hideCart, currencyChange } from "../../redux/actions/cartActions";
 import { compose } from "redux";
 
 import BackIcon from "../../assets/SVG/shogun.svg";
@@ -200,13 +200,12 @@ const CheckoutBtn = styled.a`
 class Cart extends Component {
   state = {
     currency: "",
-    alternativePricingData: [],
   };
   CloseCart = () => {
     this.props.hideCart();
   };
 
-  ChangeCurrency = (event) => {
+  changeCurrency = (event) => {
     this.setState({ currency: event.target.value }, async () => {
       console.log("state: ", this.state.currency);
       const CHANGE_CURRENCY_QUERY = gql`
@@ -223,10 +222,11 @@ class Cart extends Component {
         query: CHANGE_CURRENCY_QUERY,
       });
 
-      this.setState({
-        alternativePricingData: data.products,
-      });
-      console.log("data: ", data);
+      // this.setState({
+      //   alternativePricingData: data.products,
+      // });
+      // console.log("data: ", data);
+      this.props.currencyChange(data);
     });
   };
 
@@ -274,7 +274,7 @@ class Cart extends Component {
                           padding: "8px 15px 6px 10px",
                           backgroundPosition: "47px center",
                         }}
-                        onChange={this.ChangeCurrency}
+                        onChange={this.changeCurrency}
                         value={this.state.currency}
                       >
                         {data.currency.map((currency, index) => (
@@ -294,28 +294,9 @@ class Cart extends Component {
               {this.props.cart.cart.length === 0 ? (
                 <CartEmptyMsg>There are no items in your cart</CartEmptyMsg>
               ) : (
-                this.props.cart.cart.map((product) => {
-                  if (this.state.alternativePricingData.length > 0) {
-                    const item = this.state.alternativePricingData.find(
-                      (item) => item.id === product.id
-                    );
-                    return (
-                      <CartItem
-                        key={product.id}
-                        product={product}
-                        altPrice={item.price}
-                      />
-                    );
-                  }
-
-                  return (
-                    <CartItem
-                      key={product.id}
-                      product={product}
-                      altPrice={null}
-                    />
-                  );
-                })
+                this.props.cart.cart.map((product) => (
+                  <CartItem key={product.id} product={product} />
+                ))
               )}
             </CartItemList>
           </CartBody>
@@ -347,5 +328,5 @@ const mapStateToProps = (state) => ({
 
 export default compose(
   withApollo,
-  connect(mapStateToProps, { hideCart })
+  connect(mapStateToProps, { hideCart, currencyChange })
 )(Cart);

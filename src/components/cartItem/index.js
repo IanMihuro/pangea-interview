@@ -107,7 +107,7 @@ class CartItem extends Component {
   };
 
   render() {
-    const { id, title, price, image_url } = this.props.product;
+    const { id, title, image_url } = this.props.product;
 
     const item = this.props.cart.cart.find((product) => product.id === id);
 
@@ -130,11 +130,7 @@ class CartItem extends Component {
               +
             </IncreaseBtn>
           </QuantitySelector>
-          {this.props.altPrice !== null ? (
-            <Price>{this.props.altPrice}</Price>
-          ) : (
-            <Price>${price}</Price>
-          )}
+          <Price>${item.price}</Price>
         </QuantityContainer>
       </CartItemContainer>
     );

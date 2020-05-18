@@ -5,6 +5,7 @@ import {
   REMOVE_FROM_CART,
   INCREMENT_QUANTITY,
   DECREMENT_QUANTITY,
+  CURRENCY_CHANGE,
 } from "./types.js";
 
 export function showCart() {
@@ -55,6 +56,15 @@ export function decrementQuantity(id) {
     dispatch({
       type: DECREMENT_QUANTITY,
       payload: id,
+    });
+  };
+}
+
+export function currencyChange(products) {
+  return function (dispatch) {
+    dispatch({
+      type: CURRENCY_CHANGE,
+      payload: products,
     });
   };
 }
