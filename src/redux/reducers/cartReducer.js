@@ -28,7 +28,7 @@ export default function (state = initialState, action) {
         showCart: false,
       };
 
-    case ADD_TO_CART:
+    case ADD_TO_CART: {
       let newState = { ...state };
 
       const exists = newState.cart.find(
@@ -58,72 +58,68 @@ export default function (state = initialState, action) {
         totalAmount: newState.totalAmount + action.payload.price,
         cart: [...newState.cart, { ...action.payload, quantity: 1 }],
       };
-
-    case REMOVE_FROM_CART:
-      let copiedState = { ...state };
-      const product = copiedState.cart.filter(
+    }
+    case REMOVE_FROM_CART: {
+      let newState = { ...state };
+      const product = newState.cart.find(
         (product) => product.id === action.payload
       );
       const newTotalAmount =
-        copiedState.totalAmount - product[0].quantity * product[0].price;
-      const newTotalQuantity = copiedState.totalQuantity - product[0].quantity;
-      const index = copiedState.cart.indexOf(action.payload);
-      copiedState.cart.splice(index, 1);
+        newState.totalAmount - product.quantity * product.price;
+      const newTotalQuantity = newState.totalQuantity - product.quantity;
+      const index = newState.cart.indexOf(action.payload);
+      newState.cart.splice(index, 1);
 
       return {
-        ...copiedState,
+        ...newState,
         totalAmount: newTotalAmount,
         totalQuantity: newTotalQuantity,
       };
+    }
 
-    case INCREMENT_QUANTITY:
-      let incrementedState = { ...state };
-      const productItem = incrementedState.cart.filter(
+    case INCREMENT_QUANTITY: {
+      let newState = { ...state };
+      const productItem = newState.cart.find(
         (product) => product.id === action.payload
-      )[0];
-      const productIndex = state.cart.indexOf(productItem);
-      incrementedState.cart[productIndex].quantity =
-        incrementedState.cart[productIndex].quantity + 1;
-      const newTotalAmountIncremented =
-        incrementedState.totalAmount + parseInt(productItem.price);
-      const newTotalQuantityIncremented = parseInt(
-        incrementedState.totalQuantity + 1
       );
+      const productIndex = state.cart.indexOf(productItem);
+      newState.cart[productIndex].quantity =
+        newState.cart[productIndex].quantity + 1;
+      const newTotalAmount = newState.totalAmount + parseInt(productItem.price);
+      const newTotalQuantity = parseInt(newState.totalQuantity + 1);
 
       return {
-        ...incrementedState,
-        totalAmount: newTotalAmountIncremented,
-        totalQuantity: newTotalQuantityIncremented,
+        ...newState,
+        totalAmount: newTotalAmount,
+        totalQuantity: newTotalQuantity,
       };
-    case DECREMENT_QUANTITY:
-      let decrementState = { ...state };
-      const productItemA = decrementState.cart.filter(
+    }
+    case DECREMENT_QUANTITY: {
+      let newState = { ...state };
+      const productItem = newState.cart.find(
         (product) => product.id === action.payload
-      )[0];
-      const productIndexA = state.cart.indexOf(productItemA);
-      decrementState.cart[productIndexA].quantity =
-        decrementState.cart[productIndexA].quantity - 1;
-      const newTotalAmountIncrementedA =
-        decrementState.totalAmount - parseInt(productItemA.price);
-      const newTotalQuantityIncrementedA = parseInt(
-        decrementState.totalQuantity - 1
       );
+      const productIndex = state.cart.indexOf(productItem);
+      newState.cart[productIndex].quantity =
+        newState.cart[productIndex].quantity - 1;
+      const newTotalAmount = newState.totalAmount - parseInt(productItem.price);
+      const newTotalQuantity = parseInt(newState.totalQuantity - 1);
 
-      if (decrementState.cart[productIndexA].quantity === 0) {
-        decrementState.cart.splice(productIndexA, 1);
+      if (newState.cart[productIndex].quantity === 0) {
+        newState.cart.splice(productIndex, 1);
         return {
-          ...decrementState,
-          totalAmount: newTotalAmountIncrementedA,
-          totalQuantity: newTotalQuantityIncrementedA,
+          ...newState,
+          totalAmount: newTotalAmount,
+          totalQuantity: newTotalQuantity,
         };
       }
 
       return {
-        ...decrementState,
-        totalAmount: newTotalAmountIncrementedA,
-        totalQuantity: newTotalQuantityIncrementedA,
+        ...newState,
+        totalAmount: newTotalAmount,
+        totalQuantity: newTotalQuantity,
       };
-
+    }
     default:
       return state;
   }
